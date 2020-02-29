@@ -3,6 +3,7 @@ package com.jasondavidpeters.village.game;
 import java.util.Scanner;
 
 import com.jasondavidpeters.village.entity.Player;
+import com.jasondavidpeters.village.world.Mine;
 
 public class Game implements Runnable {
 
@@ -11,6 +12,8 @@ public class Game implements Runnable {
 	private boolean running;
 
 	private GameState defaultState = GameState.LOGIN;
+	
+	private static Mine mine;
 
 	Player p = null;
 
@@ -19,6 +22,7 @@ public class Game implements Runnable {
 
 	public static void main(String[] args) {
 		Game game = new Game();
+		mine = new Mine();
 		game.start();
 	}
 
@@ -36,8 +40,6 @@ public class Game implements Runnable {
 		double ticks = 60.0;
 		double ns = 1000000000.0 / ticks;
 		long timer = System.currentTimeMillis();
-		int tickCounter = 0;
-
 		while (running) {
 			nowTime = System.nanoTime();
 			pastTime += (nowTime - beforeTime) / ns;
@@ -46,13 +48,11 @@ public class Game implements Runnable {
 			while (pastTime >= 1) {
 				pastTime -= 1;
 				tick();
-				tickCounter++;
 			}
 
 			while ((System.currentTimeMillis() - timer) >= 1000) {
 				// System.out.println("Ticks per second: " + tickCounter);
 				timer = System.currentTimeMillis();
-				tickCounter = 0;
 			}
 		}
 	}
@@ -88,6 +88,7 @@ public class Game implements Runnable {
 				}
 				if (response.equalsIgnoreCase("exit")) {
 					stop();
+					System.exit(1);
 					break;
 				} else {
 					System.out.println("Location: " + response + " does not exist.");
@@ -102,9 +103,11 @@ public class Game implements Runnable {
 				String response = sc.next();
 				if (response.equalsIgnoreCase("mine_ore")) {
 					// begin mining ore
+					mine.beginMining();
 					break;
 				} else if (response.equalsIgnoreCase("exit")) {
 					setGameState(GameState.VILLAGE);
+					p.save(p);
 					break;
 				} else {
 					System.out.println("Option: " + response + " does not exist.");
