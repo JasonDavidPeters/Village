@@ -11,10 +11,13 @@ public class Player extends Entity {
 	String name;
 
 	int[] inventory = new int[30];
+	
+	private int money;
 
-	public Player(String name) {
+	public Player(String name, int money) {
 		super(name);
 		this.name = name;
+		this.money=money;
 	}
 
 	private void createPlayer(Player p) {
@@ -70,6 +73,7 @@ public class Player extends Entity {
 				// System.out.println(inventory[i]);
 				fw.write("Inventory-" + i + "\t" + inventory[i] + "\n");
 			}
+			fw.write("Money\t" + p.getMoney() + "\n");
 			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -89,6 +93,9 @@ public class Player extends Entity {
 				String[] t = line.split("\t"); // splitting the key from value in file
 				line.trim();
 				//System.out.println(t[0] + " " + t[1]);
+				if (t[0].equalsIgnoreCase("money") ) {
+					p.setMoney(Integer.parseInt(t[1]));
+				}
 				String[] invSlots=t[0].split("-");
 				if (invSlots[0].equalsIgnoreCase("inventory"))
 				for (int i = 0; i < inventory.length; i++) {
@@ -116,6 +123,12 @@ public class Player extends Entity {
 
 	public int[] getInventory() {
 		return this.inventory;
+	}
+	public int getMoney() {
+		return this.money;
+	}
+	public void setMoney(int money) {
+		this.money=money;
 	}
 
 }

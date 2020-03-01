@@ -3,7 +3,9 @@ package com.jasondavidpeters.village.game;
 import java.util.Scanner;
 
 import com.jasondavidpeters.village.entity.Player;
+import com.jasondavidpeters.village.input.Keypress;
 import com.jasondavidpeters.village.world.Mine;
+import com.jasondavidpeters.village.world.Shop;
 
 public class Game implements Runnable {
 
@@ -13,7 +15,8 @@ public class Game implements Runnable {
 
 	private GameState defaultState = GameState.LOGIN;
 
-	private static Mine mine;
+	private Mine mine;
+	private Shop shop;
 
 	Player p = null;
 
@@ -22,18 +25,18 @@ public class Game implements Runnable {
 
 	public static void main(String[] args) {
 		Game game = new Game();
-		mine = new Mine();
 		game.start();
 	}
 
-	public void start() {
+	public synchronized void start() {
 		thread = new Thread(this);
 		thread.run();
 	}
 
 	public void run() {
 		running = true;
-
+		mine = new Mine();
+		shop = new Shop();
 		long beforeTime = System.nanoTime();
 		long nowTime = 0;
 		double pastTime = 0;
@@ -51,7 +54,6 @@ public class Game implements Runnable {
 			}
 
 			while ((System.currentTimeMillis() - timer) >= 1000) {
-				// System.out.println("Ticks per second: " + tickCounter);
 				timer = System.currentTimeMillis();
 			}
 		}
@@ -65,7 +67,7 @@ public class Game implements Runnable {
 			System.out.println("What is your name?");
 			if (sc.hasNext()) {
 				playerName = sc.next();
-				p = new Player(playerName);
+				p = new Player(playerName, 0);
 
 				setGameState(GameState.VILLAGE);
 			}
@@ -124,9 +126,6 @@ public class Game implements Runnable {
 				}
 			}
 		}
-		if (getGameState() == GameState.SHOP) {
-			System.out.println("Entering the shop");
-		}
 		if (getGameState() == GameState.INVENTORY) {
 			int tin = -1, copper = -1, iron = -1, mithril = -1, adamant = -1, rune = -1;
 			int[] inv = p.getInventory();
@@ -155,7 +154,8 @@ public class Game implements Runnable {
 			System.out.println("You currently have:\n" + (tin != -1 ? tin + "x tin ore\n" : "")
 					+ (copper != -1 ? copper + "x copper ore\n" : "") + (iron != -1 ? iron + "x iron ore\n" : "")
 					+ (mithril != -1 ? mithril + "x mithril ore\n" : "")
-					+ (adamant != -1 ? adamant + "x adamant ore\n" : "") + (rune != -1 ? rune + "x runite ore\n" : ""));
+					+ (adamant != -1 ? adamant + "x adamant ore\n" : "") + (rune != -1 ? rune + "x runite ore\n" : "")
+					+ "\nMoney: " + p.getMoney());
 			/*
 			 * check inventory 1x tin_ore 5x mithril_ore
 			 */
@@ -182,9 +182,37 @@ public class Game implements Runnable {
 				}
 			}
 		}
+		if (getGameState() == GameState.SHOP) {
+			System.out.println("Entering the shop");
+			System.out.println("What would you like to do here?");
+			System.out.println("SELL\tMINE\tINVENTORY\tEXIT");
+			while (sc.hasNext()) {
+				String response = sc.next();
+				if (response.equalsIgnoreCase("mine")) {
+					setGameState(GameState.MINE);
+					break;
+				}
+				if (response.equalsIgnoreCase("inventory")) {
+					setGameState(GameState.INVENTORY);
+					break;
+				}
+				if (response.equalsIgnoreCase("sell")) {
+					shop.sell(p,p.getInventory());
+					break;
+				}
+				if (response.equalsIgnoreCase("exit")) {
+					p.save(p);
+					stop();
+					break;
+				} else {
+					System.out.println("Location: " + response + " does not exist.");
+					return;
+				}
+			}
+		}
 	}
 
-	public void stop() {
+	public synchronized void stop() {
 		running = false;
 		try {
 			thread.join();

@@ -6,20 +6,16 @@ import com.jasondavidpeters.village.entity.Player;
 
 public class Mine {
 
-	enum Ores {
-		TIN, COPPER, IRON, COAL, MITHRIL, ADAMANT, RUNITE;
-	}
-
 	public Mine() {
 
 	}
 
-	public double getChance(Ores ore) {
+	public double getChance(Ore ore) {
 		/* Get chance of Ores from a file? */
 		return 0.0;
 	}
 
-	public int getLevel(Ores ore) {
+	public int getLevel(Ore ore) {
 		switch (ore) {
 		case TIN:
 			return 1;
@@ -59,35 +55,35 @@ public class Mine {
 		int lowerBound = 500; // lowest is 1 second
 		int upperBound = 1000; // highest we want to wait is 10 seconds
 		int randTime = randomTime.nextInt(upperBound - lowerBound) + lowerBound;
-		Random r = new Random(Ores.values().length);
+		Random r = new Random(Ore.values().length);
 		System.out.println("You have " + freeSlots + "/" + p.getInventory().length + " free inventory slots");
-		Ores oreMined = null;
+		Ore oreMined = null;
 		while (freeSlots > 0) { // while player has inventory slot
-
+			
 			if ((System.currentTimeMillis() - timer) >= randTime) {
 				switch (chance.nextInt(2)) {
 				case 0:
 					switch (r.nextInt(7)) {
 					case 0:
-						oreMined = Ores.TIN;
+						oreMined = Ore.TIN;
 						break;
 					case 1:
-						oreMined = Ores.COPPER;
+						oreMined = Ore.COPPER;
 						break;
 					case 2:
-						oreMined = Ores.IRON;
+						oreMined = Ore.IRON;
 						break;
 					case 3:
-						oreMined = Ores.MITHRIL;
+						oreMined = Ore.MITHRIL;
 						break;
 					case 4:
-						oreMined = Ores.ADAMANT;
+						oreMined = Ore.ADAMANT;
 						break;
 					case 5:
-						oreMined = Ores.RUNITE;
+						oreMined = Ore.RUNITE;
 						break;
 					default:
-						oreMined = Ores.TIN;
+						oreMined = Ore.TIN;
 						break;
 
 					}
