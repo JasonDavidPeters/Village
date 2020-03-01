@@ -3,7 +3,6 @@ package com.jasondavidpeters.village.game;
 import java.util.Scanner;
 
 import com.jasondavidpeters.village.entity.Player;
-import com.jasondavidpeters.village.input.Keypress;
 import com.jasondavidpeters.village.world.Mine;
 import com.jasondavidpeters.village.world.Shop;
 
