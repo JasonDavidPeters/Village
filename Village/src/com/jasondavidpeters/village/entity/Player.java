@@ -1,6 +1,9 @@
 package com.jasondavidpeters.village.entity;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -24,7 +27,7 @@ public class Player extends Entity {
 		}
 
 		for (int i = 0; i < inventory.length; i++) {
-			inventory[i] = 0;
+			inventory[i] = -1;
 		}
 
 		save(p);
@@ -38,6 +41,7 @@ public class Player extends Entity {
 			saveDir.mkdir(); // if folders do not exist then create
 		}
 		if (saveFile.exists()) { // if the player file exists then return true
+			load(p);
 			return true;
 		} else {
 			createPlayer(p);
@@ -60,10 +64,12 @@ public class Player extends Entity {
 			}
 		}
 		try {
-			FileWriter fw = new FileWriter(saveFile);
-			fw.write("Name:\t" + p.getName() + "\n");
-			for (int i = 0; i < inventory.length; i++)
-				fw.write("Inventory[" + i + "]\t" + inventory[i] + "\n");
+			FileWriter fw = new FileWriter(saveFile, false);
+			fw.write("Name\t" + p.getName() + "\n");
+			for (int i = 0; i < inventory.length; i++) {
+				// System.out.println(inventory[i]);
+				fw.write("Inventory-" + i + "\t" + inventory[i] + "\n");
+			}
 			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -71,12 +77,41 @@ public class Player extends Entity {
 
 	}
 
-	private void load() {
+	private void load(Player p) {
+		File saveDir = new File(System.getProperty("user.dir") + "/saves/");
+		File saveFile = new File(saveDir.getPath() + "/" + p.getName() + ".txt");
 
+		try {
+			FileReader fr = new FileReader(saveFile);
+			BufferedReader br = new BufferedReader(fr);
+			String line = br.readLine();
+			while (line != null) {
+				String[] t = line.split("\t"); // splitting the key from value in file
+				line.trim();
+				//System.out.println(t[0] + " " + t[1]);
+				String[] invSlots=t[0].split("-");
+				if (invSlots[0].equalsIgnoreCase("inventory"))
+				for (int i = 0; i < inventory.length; i++) {
+					inventory[Integer.parseInt(invSlots[1])] = Integer.parseInt(t[1]);
+				}
+				line = br.readLine();
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// int[] inv = new int[30]; // load player inventory here
+		// setInventory(inv);
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public void setInventory(int[] inventory) {
+		this.inventory = inventory;
 	}
 
 	public int[] getInventory() {

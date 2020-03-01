@@ -12,7 +12,7 @@ public class Game implements Runnable {
 	private boolean running;
 
 	private GameState defaultState = GameState.LOGIN;
-	
+
 	private static Mine mine;
 
 	Player p = null;
@@ -74,7 +74,7 @@ public class Game implements Runnable {
 			System.out.println((p.playerExists(p)) ? "Hello and welcome back, " + p.getName()
 					: "Hello, and welcome to the Village, " + p.getName());
 			System.out.println("Where would you like to go today?");
-			System.out.println("SHOP\tMINE\tEXIT");
+			System.out.println("SHOP\tMINE\tINVENTORY\tEXIT");
 
 			while (sc.hasNext()) {
 				String response = sc.next();
@@ -86,7 +86,12 @@ public class Game implements Runnable {
 					setGameState(GameState.MINE);
 					break;
 				}
+				if (response.equalsIgnoreCase("inventory")) {
+					setGameState(GameState.INVENTORY);
+					break;
+				}
 				if (response.equalsIgnoreCase("exit")) {
+					p.save(p);
 					stop();
 					System.exit(1);
 					break;
@@ -98,15 +103,19 @@ public class Game implements Runnable {
 		}
 		if (getGameState() == GameState.MINE) {
 			System.out.println("Entering the mine...");
-			System.out.println("Please choose from the options below\n MINE_ORE\t EXIT");
+			System.out.println("Please choose from the options below\n MINE_ORE\tINVENTORY\t EXIT");
 			while (sc.hasNext()) {
 				String response = sc.next();
 				if (response.equalsIgnoreCase("mine_ore")) {
 					// begin mining ore
-					mine.beginMining();
+					mine.beginMining(p);
 					break;
 				} else if (response.equalsIgnoreCase("exit")) {
 					setGameState(GameState.VILLAGE);
+					p.save(p);
+					break;
+				} else if (response.equalsIgnoreCase("inventory")) {
+					setGameState(GameState.INVENTORY);
 					p.save(p);
 					break;
 				} else {
@@ -117,6 +126,61 @@ public class Game implements Runnable {
 		}
 		if (getGameState() == GameState.SHOP) {
 			System.out.println("Entering the shop");
+		}
+		if (getGameState() == GameState.INVENTORY) {
+			int tin = -1, copper = -1, iron = -1, mithril = -1, adamant = -1, rune = -1;
+			int[] inv = p.getInventory();
+			for (int i : inv) {
+				switch (i) {
+				case 0:
+					tin++;
+					break;
+				case 1:
+					copper++;
+					break;
+				case 2:
+					iron++;
+					break;
+				case 3:
+					mithril++;
+					break;
+				case 4:
+					adamant++;
+					break;
+				case 5:
+					rune++;
+					break;
+				}
+			}
+			System.out.println("You currently have:\n" + (tin != -1 ? tin + "x tin ore\n" : "")
+					+ (copper != -1 ? copper + "x copper ore\n" : "") + (iron != -1 ? iron + "x iron ore\n" : "")
+					+ (mithril != -1 ? mithril + "x mithril ore\n" : "")
+					+ (adamant != -1 ? adamant + "x adamant ore\n" : "") + (rune != -1 ? rune + "x runite ore\n" : ""));
+			/*
+			 * check inventory 1x tin_ore 5x mithril_ore
+			 */
+			System.out.println("Where would you like to go now?");
+			System.out.println("SHOP\tMINE\tEXIT");
+			while (sc.hasNext()) {
+				String response = sc.next();
+				if (response.equalsIgnoreCase("shop")) {
+					setGameState(GameState.SHOP);
+					break;
+				}
+				if (response.equalsIgnoreCase("mine")) {
+					setGameState(GameState.MINE);
+					break;
+				}
+				if (response.equalsIgnoreCase("exit")) {
+					p.save(p);
+					stop();
+					System.exit(1);
+					break;
+				} else {
+					System.out.println("Location: " + response + " does not exist.");
+					return;
+				}
+			}
 		}
 	}
 
